@@ -1,6 +1,7 @@
-import LoginFrom from "../_components/loginFrom";
+import React from "react";
+import Registerfrom from "../_components/registerfrom";
 
-export default function loginpage() {
+const regesterpage = () => {
   return (
     <>
       <div className="flex min-h-screen items-center justify-center">
@@ -11,9 +12,11 @@ export default function loginpage() {
               enter your crendintial enter our account
             </p>
           </div>
-          <LoginFrom/>
+          <Registerfrom/>
         </div>
       </div>
     </>
   );
-}
+};
+
+export default regesterpage;
