@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-const registerfrom = () => {
+const RegisterFrom = () => {
   return (
     <form className="space-y-4">
       <Card className="p-5 space-y-4">
@@ -36,4 +36,4 @@ const registerfrom = () => {
   );
 };
 
-export default registerfrom;
+export default RegisterFrom;
