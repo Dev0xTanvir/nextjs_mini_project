@@ -1,3 +1,10 @@
-export default function HomePage() {
+
+
+export default async function HomePage() {
+
+  
+
+  
+
   return <div>hellow nextjs</div>;
 }

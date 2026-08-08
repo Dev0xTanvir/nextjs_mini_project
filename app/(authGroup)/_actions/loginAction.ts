@@ -1,5 +1,7 @@
 "use server";
 
+import { cookies } from "next/headers";
+
 type loginstate = {
   success: boolean;
   statuscode: number;
@@ -31,6 +33,22 @@ export const loginaction = async (
   });
 
   const result = await res.json();
+
+  if (result.success) {
+    const cookiestore = await cookies();
+
+    cookiestore.set("accesstoken", result.data.accesstoken, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24,
+    });
+
+    cookiestore.set("refreshtoken", result.data.refreshtoken, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+  }
 
   return result;
 };

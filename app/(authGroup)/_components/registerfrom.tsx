@@ -1,11 +1,29 @@
 "use client";
-import React from "react";
+import React, { useActionState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { registeraction } from "../_actions/registerAction";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const RegisterFrom = () => {
+
+  const [state, action, pending] = useActionState(registeraction, false);
+  const router = useRouter();
+  
+  useEffect(() => {
+    if (!state) return;
+    if (state.success) {
+      toast.success(state.message || "registation successful");
+      router.push("/login");
+    }
+    if (!state.success) {
+      toast.error(state.message || "registation faield");
+    }
+  }, [state, router]);
+
   return (
-    <form className="space-y-4">
+    <form action={action} className="space-y-4">
       <Card className="p-5 space-y-4">
         <Input name="name" type="text" placeholder="Enter your name" required />
 
@@ -30,7 +48,7 @@ const RegisterFrom = () => {
           required
         />
 
-        <button type="submit">Register</button>
+        <button type="submit">{pending ? "loading..." : "Register"}</button>
       </Card>
     </form>
   );
