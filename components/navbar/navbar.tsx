@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { logout } from "@/service/logout";
 
 type getmedata = {
   data: {
@@ -26,19 +27,59 @@ type getmedata = {
   };
 };
 
-type Navbarprops = {
-  iuser: getmedata;
+type NavbarProps = {
+  iuser: getmedata | null;
 };
 
-const Navbar = ({ iuser }: Navbarprops) => {
+export function Navbar({ iuser }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      setDropdownOpen(false);
+      setIsOpen(false);
+
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  if (!iuser?.data?.profile) {
+    return (
+      <nav className="sticky top-0 z-50 w-full border-b bg-background">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+          <Link href="/" className="text-xl font-bold">
+            MyApp
+          </Link>
+
+          <div className="flex gap-2">
+            <Link
+              href="/login"
+              className="rounded-md px-4 py-2 text-sm hover:bg-accent"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/register"
+              className="rounded-md bg-primary px-4 py-2 text-sm"
+            >
+              Register
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   const user = {
-    name: iuser.data.profile.name,
-    email: iuser.data.profile.email,
-    profile: iuser.data.profile.profile.profilePhoto
+    profilePhoto: iuser?.data?.profile?.profile?.profilePhoto,
+    name: iuser?.data?.profile?.name,
+    email: iuser?.data?.profile?.email,
   };
 
   return (
@@ -98,7 +139,7 @@ const Navbar = ({ iuser }: Navbarprops) => {
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                      {user.name.charAt(0).toUpperCase()}
+                      {iuser?.data.profile.name.charAt(0).toUpperCase()}
                     </div>
 
                     {/* Name & Email */}
@@ -123,7 +164,7 @@ const Navbar = ({ iuser }: Navbarprops) => {
                   className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
                 >
                   <User className="h-4 w-4" />
-                  { user.profile}
+                  {user.profilePhoto}
                 </Link>
 
                 {/* Settings */}
@@ -141,10 +182,7 @@ const Navbar = ({ iuser }: Navbarprops) => {
                 {/* Logout */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    console.log("Logout");
-                  }}
+                  onClick={handleLogout}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-red-500 transition-colors hover:bg-red-500/10"
                 >
                   <LogOut className="h-4 w-4" />
@@ -220,7 +258,7 @@ const Navbar = ({ iuser }: Navbarprops) => {
                   <div className="px-2 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                        {user.name.charAt(0).toUpperCase()}
+                        {iuser?.data.profile.name.charAt(0).toUpperCase()}
                       </div>
 
                       <div className="min-w-0">
@@ -237,40 +275,25 @@ const Navbar = ({ iuser }: Navbarprops) => {
 
                   <div className="my-1 h-px bg-border" />
 
-                  <Link
-                    href="/profile"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      setIsOpen(false);
-                    }}
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent"
-                  >
+                  <span>{user.name}</span>
+                  <span>{user.email}</span>
+
+                  {/* Profile */}
+                  <Link href="/profile">
                     <User className="h-4 w-4" />
                     Profile
                   </Link>
 
-                  <Link
-                    href="/settings"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      setIsOpen(false);
-                    }}
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent"
-                  >
+                  {/* Settings */}
+                  <Link href="/settings">
                     <Settings className="h-4 w-4" />
                     Settings
                   </Link>
 
-                  <div className="my-1 h-px bg-border" />
-
+                  {/* Logout */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      setIsOpen(false);
-                      console.log("Logout");
-                    }}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-red-500 hover:bg-red-500/10"
+                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
                     Logout
@@ -283,6 +306,6 @@ const Navbar = ({ iuser }: Navbarprops) => {
       )}
     </nav>
   );
-};
+}
 
 export default Navbar;

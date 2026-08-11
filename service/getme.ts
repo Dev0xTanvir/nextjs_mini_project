@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 export const getme = async () => {
@@ -17,6 +18,11 @@ export const getme = async () => {
   const res = await fetch(`${process.env.BACKEND_URL}/api/users/getme`, {
     headers: {
       cookie: `accesstoken=${accesstoken}`,
+    },
+    cache: "force-cache",
+    next: {
+      revalidate: 60 * 60 * 24,
+      tags: ["my-app"],
     },
   });
 
