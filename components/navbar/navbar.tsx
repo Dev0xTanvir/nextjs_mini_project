@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ChevronDown, User, Settings, LogOut } from "lucide-react";
 import { logout } from "@/service/logout";
+import { toast } from "sonner";
 
 type getmedata = {
   data: {
@@ -39,11 +40,14 @@ export function Navbar({ iuser }: NavbarProps) {
     try {
       await logout();
 
+      toast.success("logout successful");
+
       setDropdownOpen(false);
       setIsOpen(false);
 
       window.location.href = "/login";
     } catch (error) {
+      toast.error("Logout failed");
       console.error("Logout failed:", error);
     }
   };
@@ -291,10 +295,7 @@ export function Navbar({ iuser }: NavbarProps) {
                   </Link>
 
                   {/* Logout */}
-                  <button
-                    type="button"
-                     onClick={handleLogout}
-                  >
+                  <button type="button" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                     Logout
                   </button>

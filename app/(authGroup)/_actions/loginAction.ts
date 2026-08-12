@@ -1,6 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { redirect } from "next/navigation";
 
 type loginstate = {
   success: boolean;
@@ -49,6 +51,18 @@ export const loginaction = async (
       maxAge: 60 * 60 * 24 * 7,
     });
   }
+
+  const decodetoken = jwt.decode(result.data.accesstoken) as JwtPayload;
+
+  if (decodetoken.role === "ADMIN") {
+    redirect("/admin-dashboard");
+  } else if (decodetoken.role === "USER") {
+    redirect("/dashboard");
+  } else if (decodetoken.role === "AUTHOR") {
+    redirect("author-dashboard");
+  }
+
+  console.log(decodetoken);
 
   return result;
 };
