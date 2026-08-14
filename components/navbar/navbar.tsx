@@ -109,6 +109,18 @@ export function Navbar({ iuser }: NavbarProps) {
           >
             About
           </Link>
+          <Link
+            href="/news"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            News
+          </Link>
+          <Link
+            href="/premium"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Premium
+          </Link>
 
           <Link
             href="/dashboard"

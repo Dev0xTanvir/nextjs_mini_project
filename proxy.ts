@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtutils } from "./lib/jwt";
+import { getaccesstoken } from "./service/refreshtoken";
 
 const AUTH_ROUTHS = ["/login", "/register"];
 const PUBLIC_ROUTHS = ["/", "/news", "/login", "/register"];
@@ -10,24 +11,55 @@ const PUBLIC_ROUTHS = ["/", "/news", "/login", "/register"];
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // get cookie
+  // set cookie accesstoken && refreshtoken
 
   const cookiestore = await cookies();
-  const accesstoken = cookiestore.get("accesstoken")?.value;
 
-  const decodetoken = accesstoken
+  let accesstoken = cookiestore.get("accesstoken")?.value;
+  const refreshtoken = cookiestore.get("refreshtoken")?.value;
+
+  let decodeaccesstoken = accesstoken
     ? jwtutils.verifytoken(accesstoken, process.env.JWT_ACCESS_SECRET as string)
     : null;
 
-  let userrole = null;
+  const decoderefreshtoken = refreshtoken
+    ? jwtutils.verifytoken(
+        refreshtoken,
+        process.env.JWT_REFRESH_SECRET as string,
+      )
+    : null;
 
-  if (!decodetoken?.success) {
-    cookiestore.delete("accesstoken");
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!decodeaccesstoken?.success && decoderefreshtoken?.success) {
+    const result = await getaccesstoken();
+
+    if (result.success) {
+      const newaccesstoken = result.data.accesstoken;
+
+      cookiestore.set("accesstoken", newaccesstoken, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24,
+        sameSite: "lax",
+      });
+
+      accesstoken = newaccesstoken;
+      
+      decodeaccesstoken = accesstoken
+        ? jwtutils.verifytoken(
+            accesstoken,
+            process.env.JWT_ACCESS_SECRET as string,
+          )
+        : null;
+    }
   }
 
-  if (decodetoken?.success && decodetoken.data) {
-    userrole = (decodetoken.data as JwtPayload).role;
+  let userrole = null;
+
+  if (!decodeaccesstoken?.success) {
+    cookiestore.delete("accesstoken");
+  }
+
+  if (decodeaccesstoken?.success && decodeaccesstoken.data) {
+    userrole = (decodeaccesstoken.data as JwtPayload).role;
   }
 
   // user all ready login but user try login & register redirect dashboard rootroute and home page
