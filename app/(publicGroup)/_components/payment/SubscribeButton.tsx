@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import { subscribePremium } from "../../_actions/subscribePremium";
+import { subscribePremium } from "../../_actions/getSubscriptionStatus";
+
 
 export function SubscribeButton() {
   const [state, action, pending] = useActionState(subscribePremium, null);

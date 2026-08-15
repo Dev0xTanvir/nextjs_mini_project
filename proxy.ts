@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtutils } from "./lib/jwt";
 import { getaccesstoken } from "./service/refreshtoken";
+import { getSubscriptionStatus } from "./app/(publicGroup)/_actions/subscribePremium";
 
 const AUTH_ROUTHS = ["/login", "/register"];
 const PUBLIC_ROUTHS = ["/", "/news", "/login", "/register"];
@@ -42,7 +43,7 @@ export async function proxy(request: NextRequest) {
       });
 
       accesstoken = newaccesstoken;
-      
+
       decodeaccesstoken = accesstoken
         ? jwtutils.verifytoken(
             accesstoken,
@@ -98,6 +99,38 @@ export async function proxy(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/author-dashboard", request.url));
   }
+
+  // payment and premiu route protected
+
+  // const getstatusResult = await getSubscriptionStatus();
+
+  //   const isActive = Boolean(
+  //     getstatusResult?.success && getstatusResult.data?.isstatus,
+  //   );
+
+  if (pathname === "/premium") {
+    const getstatusResult = await getSubscriptionStatus();
+
+    const isActive = Boolean(
+      getstatusResult?.success && getstatusResult.data?.isstatus,
+    );
+
+    if (!isActive) {
+      return NextResponse.redirect(new URL("/payment", request.url));
+    }
+  }
+
+  // if (pathname === "/payment") {
+  //   const getstatusResult = await getSubscriptionStatus();
+
+  //   const isActive = Boolean(
+  //     getstatusResult?.success && getstatusResult.data?.isstatus,
+  //   );
+
+  //   if (!isActive) {
+  //     return NextResponse.redirect(new URL("/premium", request.url));
+  //   }
+  // }
 
   //return NextResponse.redirect(new URL("/", request.url));
   return NextResponse.next();

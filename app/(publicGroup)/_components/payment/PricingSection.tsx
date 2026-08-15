@@ -7,14 +7,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckIcon } from "lucide-react";
-import { getSubscriptionStatus } from "../../_actions/getSubscriptionStatus";
+//import { getSubscriptionStatus } from "../../_actions/getSubscriptionStatus";
 import { SubscribeButton } from "./SubscribeButton";
+import { getSubscriptionStatus } from "../../_actions/subscribePremium";
 
 export async function PricingSection() {
   const statusResult = await getSubscriptionStatus();
 
+  // const statusResult = {
+  //   success: true,
+  //   data: {
+  //     isstatus: true,
+  //     currentPeriodEnd: new Date().toISOString,
+  //   },
+  // };
+
   const isActive = Boolean(
-    statusResult?.success && statusResult.data?.isSubscribed,
+    statusResult?.success && statusResult.data?.isstatus,
   );
 
   return (
