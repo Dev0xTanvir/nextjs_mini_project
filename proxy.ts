@@ -6,13 +6,12 @@ import { jwtutils } from "./lib/jwt";
 import { getaccesstoken } from "./service/refreshtoken";
 import { getSubscriptionStatus } from "./app/(publicGroup)/_actions/subscribePremium";
 
-const AUTH_ROUTHS = ["/login", "/register"];
-const PUBLIC_ROUTHS = ["/", "/news", "/login", "/register"];
+const AUTH_ROUTES = ["/login", "/register"];
+
+const PUBLIC_ROUTES = ["/", "/news", "/login", "/register"];
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
-  // set cookie accesstoken && refreshtoken
 
   const cookiestore = await cookies();
 
@@ -30,6 +29,10 @@ export async function proxy(request: NextRequest) {
       )
     : null;
 
+  // ============================================
+  // Refresh access token
+  // ============================================
+
   if (!decodeaccesstoken?.success && decoderefreshtoken?.success) {
     const result = await getaccesstoken();
 
@@ -44,69 +47,93 @@ export async function proxy(request: NextRequest) {
 
       accesstoken = newaccesstoken;
 
-      decodeaccesstoken = accesstoken
-        ? jwtutils.verifytoken(
-            accesstoken,
-            process.env.JWT_ACCESS_SECRET as string,
-          )
-        : null;
+      decodeaccesstoken = jwtutils.verifytoken(
+        newaccesstoken,
+        process.env.JWT_ACCESS_SECRET as string,
+      );
     }
   }
 
-  let userrole = null;
+  // ============================================
+  // Remove invalid access token
+  // ============================================
 
   if (!decodeaccesstoken?.success) {
     cookiestore.delete("accesstoken");
+    accesstoken = undefined;
   }
+
+  // ============================================
+  // Get user role
+  // ============================================
+
+  let userrole: string | null = null;
 
   if (decodeaccesstoken?.success && decodeaccesstoken.data) {
     userrole = (decodeaccesstoken.data as JwtPayload).role;
   }
 
-  // user all ready login but user try login & register redirect dashboard rootroute and home page
+  // ============================================
+  // Public routes
+  // ============================================
 
-  if (accesstoken && AUTH_ROUTHS.includes(pathname)) {
-    if (userrole === "USER") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    } else if (userrole === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-    } else if (userrole === "author") {
-      return NextResponse.redirect(new URL("/author-dashboard", request.url));
-    } else {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  }
-
-  const isPublic = PUBLIC_ROUTHS.some(
+  const isPublic = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  //Authencatied page protection not authorization
+  // ============================================
+  // Logged-in user trying login/register
+  // ============================================
+
+  if (accesstoken && AUTH_ROUTES.includes(pathname)) {
+    if (userrole === "USER") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    if (userrole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+    }
+
+    if (userrole === "AUTHOR") {
+      return NextResponse.redirect(new URL("/author-dashboard", request.url));
+    }
+
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // ============================================
+  // Authentication protection
+  // ============================================
 
   if (!accesstoken && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Authorization : roll based access control
+  // ============================================
+  // Authorization
+  // ============================================
 
-  if (pathname.startsWith("/dashboard") && userrole !== "USER") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  } else if (pathname.startsWith("/admin-dashboard") && userrole !== "ADMIN") {
-    return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-  } else if (
-    pathname.startsWith("/author-dashboard") &&
-    userrole !== "AUTHOR"
-  ) {
-    return NextResponse.redirect(new URL("/author-dashboard", request.url));
+  if (pathname.startsWith("/dashboard")) {
+    if (userrole !== "USER") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
-  // payment and premiu route protected
+  if (pathname.startsWith("/admin-dashboard")) {
+    if (userrole !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
 
-  // const getstatusResult = await getSubscriptionStatus();
+  if (pathname.startsWith("/author-dashboard")) {
+    if (userrole !== "AUTHOR") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
 
-  //   const isActive = Boolean(
-  //     getstatusResult?.success && getstatusResult.data?.isstatus,
-  //   );
+  // ============================================
+  // Premium route
+  // ============================================
 
   if (pathname === "/premium") {
     const getstatusResult = await getSubscriptionStatus();
@@ -120,22 +147,9 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // if (pathname === "/payment") {
-  //   const getstatusResult = await getSubscriptionStatus();
-
-  //   const isActive = Boolean(
-  //     getstatusResult?.success && getstatusResult.data?.isstatus,
-  //   );
-
-  //   if (!isActive) {
-  //     return NextResponse.redirect(new URL("/premium", request.url));
-  //   }
-  // }
-
-  //return NextResponse.redirect(new URL("/", request.url));
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  matcher: ["/((?!api|_next/static|favicon.ico|_next/image|.*\\.png$).*)"],
 };
