@@ -103,8 +103,11 @@ export const getmyposts = async () => {
 
 //--------------------------------------
 
-export const updatepost = async (postId: string, prevstate: poststate, formData: FormData) => {
-
+export const updatepost = async (
+  postId: string,
+  prevstate: poststate,
+  formData: FormData,
+) => {
   const payload = {
     title: formData.get("title") ?? "",
     content: formData.get("content") ?? "",
@@ -142,6 +145,49 @@ export const updatepost = async (postId: string, prevstate: poststate, formData:
   }
 
   if (result.success && result.data.isPremium) {
+    revalidateTag("premium-posts", {
+      expire: 0,
+    });
+  } else {
+    revalidateTag("public-posts", {
+      expire: 0,
+    });
+  }
+
+  return result;
+};
+
+//----------------------------------------
+
+export const deletepost = async (postId: string) => {
+
+  const cookiestore = await cookies();
+
+  const accesstoken = cookiestore.get("accesstoken")?.value;
+
+  if (!accesstoken) {
+    return {
+      success: false,
+      message: "user not login",
+    };
+  }
+
+  const res = await fetch(`${process.env.BACKEND_URL}/api/post/${postId}`, {
+    method: "DELETE",
+    headers: {
+      cookie: `accesstoken=${accesstoken}`,
+    },
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    revalidateTag("my-posts", {
+      expire: 0,
+    });
+  }
+
+  if (result.success) {
     revalidateTag("premium-posts", {
       expire: 0,
     });

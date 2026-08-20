@@ -1,7 +1,14 @@
-import React from "react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./_components/Sidebar";
 
-const dashboardlayout = async ({ children }: { children: React.ReactNode }) => {
-  return <div>{children}</div>;
-};
-
-export default dashboardlayout;
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
+  );
+}
