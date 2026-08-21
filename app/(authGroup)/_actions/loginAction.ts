@@ -15,6 +15,7 @@ type loginstate = {
 };
 
 export const loginaction = async (
+  redirectTo: string,
   prevstate: loginstate,
   formData: FormData,
 ) => {
@@ -53,6 +54,15 @@ export const loginaction = async (
   }
 
   const decodetoken = jwt.decode(result.data.accesstoken) as JwtPayload;
+
+  if (
+    redirectTo &&
+    typeof redirectTo === "string" &&
+    redirectTo.startsWith("/") &&
+    !redirectTo.startsWith("//")
+  ) {
+    redirect(redirectTo);
+  }
 
   if (decodetoken.role === "ADMIN") {
     redirect("/admin-dashboard");

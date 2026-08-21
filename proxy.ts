@@ -106,7 +106,11 @@ export async function proxy(request: NextRequest) {
   // ============================================
 
   if (!accesstoken && !isPublic) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const requestUrl = new URL("/login", request.url);
+
+    requestUrl.searchParams.set("redirectTo", pathname);
+
+    return NextResponse.redirect(requestUrl);
   }
 
   // ============================================

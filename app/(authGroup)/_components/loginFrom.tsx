@@ -4,9 +4,16 @@ import { Input } from "@/components/ui/input";
 import { useActionState, useEffect } from "react";
 import { loginaction } from "../_actions/loginAction";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 const LoginFrom = () => {
-  const [state, action, pending] = useActionState(loginaction, false);
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "";
+  
+  const [state, action, pending] = useActionState(
+    loginaction.bind(null, redirectTo),
+    false,
+  );
 
   useEffect(() => {
     if (!state) return;
@@ -33,9 +40,7 @@ const LoginFrom = () => {
           placeholder="enter our password"
           required
         />
-        <button type="submit">
-          {pending ? "submiting..." : "Login"}
-        </button>
+        <button type="submit">{pending ? "submiting..." : "Login"}</button>
       </Card>
     </form>
   );
