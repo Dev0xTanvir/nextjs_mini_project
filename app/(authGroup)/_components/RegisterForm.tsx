@@ -6,7 +6,7 @@ import { registeraction } from "../_actions/registerAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const RegisterFrom = () => {
+const RegisterForm = () => {
 
   const [state, action, pending] = useActionState(registeraction, false);
   const router = useRouter();
@@ -54,4 +54,4 @@ const RegisterFrom = () => {
   );
 };
 
-export default RegisterFrom;
+export default RegisterForm;

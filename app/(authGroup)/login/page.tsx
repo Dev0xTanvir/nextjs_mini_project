@@ -1,4 +1,4 @@
-import LoginFrom from "../_components/LoginFrom";
+import LoginForm from "../_components/LoginForm";
 
 export default function loginpage() {
   return (
@@ -11,7 +11,7 @@ export default function loginpage() {
               enter your crendintial enter our account
             </p>
           </div>
-          <LoginFrom />
+          <LoginForm />
         </div>
       </div>
     </>

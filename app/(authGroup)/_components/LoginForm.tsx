@@ -46,7 +46,7 @@ const LoginFormContent = () => {
   );
 };
 
-const LoginFrom = () => {
+const LoginForm = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LoginFormContent />
@@ -54,4 +54,4 @@ const LoginFrom = () => {
   );
 };
 
-export default LoginFrom;
+export default LoginForm;

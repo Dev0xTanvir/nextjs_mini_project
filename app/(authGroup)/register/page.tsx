@@ -1,7 +1,7 @@
 import React from "react";
-import Registerfrom from "../_components/RegisterFrom";
+import Registerform from "../_components/RegisterForm";
 
-const regesterpage = () => {
+const RegisterPage = () => {
   return (
     <>
       <div className="flex min-h-screen items-center justify-center">
@@ -12,11 +12,11 @@ const regesterpage = () => {
               enter your crendintial enter our account
             </p>
           </div>
-          <Registerfrom/>
+          <Registerform/>
         </div>
       </div>
     </>
   );
 };
 
-export default regesterpage;
+export default RegisterPage;
