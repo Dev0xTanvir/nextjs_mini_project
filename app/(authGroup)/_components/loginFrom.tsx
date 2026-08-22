@@ -1,12 +1,12 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, Suspense } from "react";
 import { loginaction } from "../_actions/loginAction";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 
-const LoginFrom = () => {
+const LoginFormContent = () => {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "";
   
@@ -43,6 +43,14 @@ const LoginFrom = () => {
         <button type="submit">{pending ? "submiting..." : "Login"}</button>
       </Card>
     </form>
+  );
+};
+
+const LoginFrom = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 };
 

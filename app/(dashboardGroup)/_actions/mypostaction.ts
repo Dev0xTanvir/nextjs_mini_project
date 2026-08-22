@@ -1,5 +1,7 @@
 "use server";
 
+
+import { createaccessToken } from "@/service/refreshtoken";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -30,16 +32,7 @@ export const createpost = async (prevstate: poststate, formData: FormData) => {
     isPremium: formData.get("isPremium") === "on",
   };
 
-  const cookiestore = await cookies();
-
-  const accesstoken = cookiestore.get("accesstoken")?.value;
-
-  if (!accesstoken) {
-    return {
-      success: false,
-      message: "user not login",
-    };
-  }
+  const accesstoken = await createaccessToken()
 
   const res = await fetch(`${process.env.BACKEND_URL}/api/post`, {
     method: "POST",
@@ -160,7 +153,6 @@ export const updatepost = async (
 //----------------------------------------
 
 export const deletepost = async (postId: string) => {
-
   const cookiestore = await cookies();
 
   const accesstoken = cookiestore.get("accesstoken")?.value;

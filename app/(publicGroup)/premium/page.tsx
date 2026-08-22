@@ -18,7 +18,9 @@ const PremiumPage = async ({
           </p>
         </div>
 
-        <NewsSearchBar />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <NewsSearchBar />
+        </Suspense>
       </div>
 
       <Suspense fallback={<NewsSkeleton />}>

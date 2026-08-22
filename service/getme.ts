@@ -3,11 +3,11 @@
 import { cookies } from "next/headers";
 
 export const getme = async () => {
-  const cookiestore = await cookies();
+  const cookieStore = await cookies();
 
-  const accesstoken = cookiestore.get("accesstoken")?.value;
+  const accessToken = cookieStore.get("accesstoken")?.value;
 
-  if (!accesstoken) {
+  if (!accessToken) {
     return {
       success: false,
       message: "user not login",
@@ -16,12 +16,7 @@ export const getme = async () => {
 
   const res = await fetch(`${process.env.BACKEND_URL}/api/users/getme`, {
     headers: {
-      cookie: `accesstoken=${accesstoken}`,
-    },
-    cache: "force-cache",
-    next: {
-      revalidate: 60 * 60 * 24,
-      tags: ["my-app"],
+      cookie: `accesstoken=${accessToken}`,
     },
   });
 
