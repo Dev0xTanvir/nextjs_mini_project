@@ -11,7 +11,7 @@ export default function loginpage() {
               enter your crendintial enter our account
             </p>
           </div>
-          <LoginFrom/>
+          <LoginFrom />
         </div>
       </div>
     </>
